@@ -1838,23 +1838,55 @@ Python版本: {platform.python_version()}
         status_label = ttk.Label(path_frame, text=status_text, foreground=status_color)
         status_label.pack(anchor=tk.W, padx=10, pady=5)
         
+        # 🚀 同步操作按钮 - 放在页面顶部方便操作
+        top_button_frame = ttk.LabelFrame(main_frame, text="🚀 同步操作")
+        top_button_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        # 添加一个内部框架来更好地组织按钮
+        top_button_inner_frame = ttk.Frame(top_button_frame)
+        top_button_inner_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        sync_button = ttk.Button(top_button_inner_frame, text="🚀 开始同步", state=tk.DISABLED)
+        sync_button.pack(side=tk.LEFT, padx=(0, 15), ipadx=20, ipady=5)
+        
+        sync_status_label = ttk.Label(top_button_inner_frame, text="请先扫描文件", foreground="gray")
+        sync_status_label.pack(side=tk.LEFT, padx=10)
+        
         # 同步选项
         options_frame = ttk.LabelFrame(main_frame, text="同步选项")
         options_frame.pack(fill=tk.X, pady=(0, 10))
         
+        # 同步方向选择
+        direction_frame = ttk.LabelFrame(options_frame, text="🔄 同步方向")
+        direction_frame.pack(fill=tk.X, padx=10, pady=(5, 10))
+        
+        sync_direction_var = tk.StringVar(value="local_to_remote")
+        direction_inner_frame = ttk.Frame(direction_frame)
+        direction_inner_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Radiobutton(direction_inner_frame, text="📤 本地 → 远程 (上传)", variable=sync_direction_var, 
+                       value="local_to_remote").pack(side=tk.LEFT, padx=(0, 20))
+        ttk.Radiobutton(direction_inner_frame, text="📥 远程 → 本地 (下载)", variable=sync_direction_var, 
+                       value="remote_to_local").pack(side=tk.LEFT, padx=(0, 20))
+        ttk.Radiobutton(direction_inner_frame, text="🔄 双向同步 (智能)", variable=sync_direction_var, 
+                       value="bidirectional").pack(side=tk.LEFT)
+        
         # 同步模式
         sync_mode_var = tk.StringVar(value="smart")
-        mode_frame = ttk.Frame(options_frame)
-        mode_frame.pack(fill=tk.X, padx=10, pady=5)
+        mode_frame = ttk.LabelFrame(options_frame, text="⚙️ 同步模式")
+        mode_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
         
-        ttk.Radiobutton(mode_frame, text="🧠 智能同步 (推荐)", variable=sync_mode_var, 
+        mode_inner_frame = ttk.Frame(mode_frame)
+        mode_inner_frame.pack(fill=tk.X, padx=10, pady=5)
+        
+        ttk.Radiobutton(mode_inner_frame, text="🧠 智能同步 (推荐)", variable=sync_mode_var, 
                        value="smart").pack(side=tk.LEFT, padx=(0, 15))
-        ttk.Radiobutton(mode_frame, text="🔄 强制覆盖", variable=sync_mode_var, 
+        ttk.Radiobutton(mode_inner_frame, text="🔄 强制覆盖", variable=sync_mode_var, 
                        value="force").pack(side=tk.LEFT, padx=(0, 15))
-        ttk.Radiobutton(mode_frame, text="📋 仅预览", variable=sync_mode_var, 
+        ttk.Radiobutton(mode_inner_frame, text="📋 仅预览", variable=sync_mode_var, 
                        value="preview").pack(side=tk.LEFT)
         
-        ttk.Label(options_frame, text="智能同步：只上传有变化的文件 | 强制覆盖：上传所有文件 | 仅预览：查看将要同步的文件", 
+        ttk.Label(mode_frame, text="智能：只同步有变化的文件 | 强制：同步所有文件 | 预览：查看将要同步的文件", 
                  font=("TkDefaultFont", 8)).pack(anchor=tk.W, padx=10, pady=(0, 5))
         
         # 忽略文件设置
@@ -1874,37 +1906,34 @@ Python版本: {platform.python_version()}
         scan_button_frame = ttk.Frame(scan_frame)
         scan_button_frame.pack(fill=tk.X, padx=10, pady=5)
         
-        scan_button = ttk.Button(scan_button_frame, text="🔍 扫描本地文件")
+        scan_button = ttk.Button(scan_button_frame, text="🔍 扫描文件")
         scan_button.pack(side=tk.LEFT, padx=(0, 10))
         
-        # 添加一个提示同步按钮位置的按钮
-        def highlight_sync_button():
-            """高亮显示同步按钮"""
-            try:
-                # 滚动到同步按钮区域
-                sync_button.focus_set()
-                # 临时改变按钮颜色来提醒用户
-                original_text = sync_button.cget('text')
-                sync_button.config(text="🌟 这里是同步按钮 🌟")
-                dialog.after(2000, lambda: sync_button.config(text=original_text))
-            except:
-                pass
+        # 文件选择控制按钮
+        select_all_button = ttk.Button(scan_button_frame, text="✅ 全选")
+        select_all_button.pack(side=tk.RIGHT, padx=(0, 5))
         
-        scroll_to_bottom_button = ttk.Button(scan_button_frame, text="⬇️ 查看同步按钮", 
-                                           command=highlight_sync_button)
-        scroll_to_bottom_button.pack(side=tk.RIGHT, padx=(0, 10))
+        select_none_button = ttk.Button(scan_button_frame, text="❌ 全不选")
+        select_none_button.pack(side=tk.RIGHT, padx=(0, 5))
         
-        scan_status = ttk.Label(scan_button_frame, text="点击扫描按钮开始检测本地文件")
+        select_modified_button = ttk.Button(scan_button_frame, text="🔄 选择已修改")
+        select_modified_button.pack(side=tk.RIGHT, padx=(0, 5))
+        
+        scan_status = ttk.Label(scan_button_frame, text="点击扫描按钮开始检测文件")
         scan_status.pack(side=tk.LEFT)
         
-        # 文件列表 - 减少高度以确保按钮可见
-        file_tree = ttk.Treeview(scan_frame, columns=('status', 'size', 'modified'), show='tree headings', height=6)
+        # 文件列表 - 添加勾选框和双向比较
+        file_tree = ttk.Treeview(scan_frame, columns=('selected', 'sync_direction', 'status', 'size', 'modified'), show='tree headings', height=6)
         file_tree.heading('#0', text='文件路径')
+        file_tree.heading('selected', text='✓')
+        file_tree.heading('sync_direction', text='方向')
         file_tree.heading('status', text='状态')
         file_tree.heading('size', text='大小')
         file_tree.heading('modified', text='修改时间')
         
-        file_tree.column('#0', width=300)
+        file_tree.column('#0', width=250)
+        file_tree.column('selected', width=30)
+        file_tree.column('sync_direction', width=50)
         file_tree.column('status', width=100)
         file_tree.column('size', width=80)
         file_tree.column('modified', width=120)
@@ -1916,19 +1945,17 @@ Python版本: {platform.python_version()}
         file_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(10, 0), pady=5)
         tree_scrollbar.pack(side=tk.RIGHT, fill=tk.Y, padx=(0, 10), pady=5)
         
-        # 操作按钮 - 使用更明显的样式
-        button_frame = ttk.LabelFrame(main_frame, text="🚀 同步操作")
-        button_frame.pack(fill=tk.X, pady=(10, 5))  # 增加上边距
+        # 绑定双击事件来切换选择状态
+        def toggle_file_selection(event):
+            """双击切换文件选择状态"""
+            item = file_tree.selection()[0] if file_tree.selection() else None
+            if item:
+                current_selected = file_tree.set(item, 'selected')
+                new_selected = "❌" if current_selected == "✅" else "✅"
+                file_tree.set(item, 'selected', new_selected)
+                update_selection_count()
         
-        # 添加一个内部框架来更好地组织按钮
-        button_inner_frame = ttk.Frame(button_frame)
-        button_inner_frame.pack(fill=tk.X, padx=10, pady=10)
-        
-        sync_button = ttk.Button(button_inner_frame, text="🚀 开始同步", state=tk.DISABLED)
-        sync_button.pack(side=tk.LEFT, padx=(0, 15), ipadx=20, ipady=5)
-        
-        sync_status_label = ttk.Label(button_inner_frame, text="请先扫描本地文件", foreground="gray")
-        sync_status_label.pack(side=tk.LEFT, padx=10)
+        file_tree.bind('<Double-1>', toggle_file_selection)
         
         # 关闭按钮
         close_frame = ttk.Frame(main_frame)
@@ -1937,6 +1964,49 @@ Python版本: {platform.python_version()}
         
         # 存储扫描结果
         scan_results = []
+        
+        def update_selection_count():
+            """更新选择数量统计"""
+            try:
+                total_files = len(file_tree.get_children())
+                selected_files = len([item for item in file_tree.get_children() 
+                                    if file_tree.set(item, 'selected') == "✅"])
+                
+                scan_status.config(text=f"✅ 扫描完成：共 {total_files} 个文件，已选择 {selected_files} 个")
+                
+                if selected_files > 0:
+                    sync_status_label.config(text=f"已选择 {selected_files} 个文件进行同步", foreground="blue")
+                else:
+                    sync_status_label.config(text="未选择任何文件", foreground="orange")
+            except:
+                pass
+        
+        def select_all_files():
+            """全选文件"""
+            for item in file_tree.get_children():
+                file_tree.set(item, 'selected', "✅")
+            update_selection_count()
+        
+        def select_none_files():
+            """取消全选"""
+            for item in file_tree.get_children():
+                file_tree.set(item, 'selected', "❌")
+            update_selection_count()
+        
+        def select_modified_files():
+            """只选择已修改的文件"""
+            for item in file_tree.get_children():
+                status = file_tree.set(item, 'status')
+                if status.startswith("🔄") or status.startswith("➕"):
+                    file_tree.set(item, 'selected', "✅")
+                else:
+                    file_tree.set(item, 'selected', "❌")
+            update_selection_count()
+        
+        # 绑定按钮事件
+        select_all_button.config(command=select_all_files)
+        select_none_button.config(command=select_none_files)
+        select_modified_button.config(command=select_modified_files)
         
         def should_ignore_file(file_path, ignore_patterns):
             """检查文件是否应该被忽略"""
@@ -1953,17 +2023,12 @@ Python版本: {platform.python_version()}
                     return True
             return False
         
-        def scan_local_files():
-            """扫描本地文件"""
+        def scan_files():
+            """扫描并比较本地和远程文件"""
             nonlocal scan_results
             
-            if not os.path.exists(local_repo_path):
-                scan_status.config(text="❌ 本地仓库路径不存在")
-                messagebox.showerror("错误", f"本地仓库路径不存在: {local_repo_path}")
-                return
-            
             try:
-                scan_status.config(text="🔍 正在扫描本地文件...")
+                scan_status.config(text="🔍 正在扫描和比较文件...")
                 scan_button.config(state=tk.DISABLED)
                 
                 # 清空之前的结果
@@ -1972,10 +2037,13 @@ Python版本: {platform.python_version()}
                 scan_results = []
                 
                 ignore_patterns = ignore_text.get(1.0, tk.END).strip()
+                sync_direction = sync_direction_var.get()
                 
-                # 获取远程文件列表用于对比
+                # 获取远程文件列表
                 remote_files = {}
+                remote_file_details = {}
                 try:
+                    scan_status.config(text="🔍 获取远程文件列表...")
                     def get_all_files(repo, path=""):
                         """递归获取所有远程文件"""
                         contents = repo.get_contents(path)
@@ -1987,149 +2055,292 @@ Python版本: {platform.python_version()}
                                 get_all_files(repo, content.path)
                             else:
                                 remote_files[content.path] = content.sha
+                                remote_file_details[content.path] = {
+                                    'size': content.size,
+                                    'sha': content.sha
+                                }
                     
                     get_all_files(repo)
                 except Exception as e:
                     print(f"获取远程文件列表失败: {e}")
                 
+                scan_status.config(text="🔍 扫描本地文件...")
+                
+                # 存储所有文件信息（本地+远程）
+                all_files = {}
+                
                 # 扫描本地文件
-                for root, dirs, files in os.walk(local_repo_path):
-                    for file in files:
-                        local_file_path = os.path.join(root, file)
-                        relative_path = os.path.relpath(local_file_path, local_repo_path)
-                        relative_path = relative_path.replace('\\', '/')  # 转换为 Unix 路径格式
-                        
-                        # 检查是否应该忽略
-                        if should_ignore_file(relative_path, ignore_patterns):
-                            continue
-                        
-                        try:
-                            # 获取文件信息
-                            file_stat = os.stat(local_file_path)
-                            file_size = file_stat.st_size
-                            file_mtime = datetime.fromtimestamp(file_stat.st_mtime).strftime("%Y-%m-%d %H:%M")
+                if os.path.exists(local_repo_path):
+                    for root, dirs, files in os.walk(local_repo_path):
+                        for file in files:
+                            local_file_path = os.path.join(root, file)
+                            relative_path = os.path.relpath(local_file_path, local_repo_path)
+                            relative_path = relative_path.replace('\\', '/')
                             
-                            # 计算本地文件SHA
+                            # 检查是否应该忽略
+                            if should_ignore_file(relative_path, ignore_patterns):
+                                continue
+                            
                             try:
-                                with open(local_file_path, 'rb') as f:
-                                    content = f.read()
-                                local_sha = hashlib.sha1(f"blob {len(content)}\0".encode() + content).hexdigest()
-                            except Exception:
-                                local_sha = None
-                            
-                            # 确定文件状态
-                            if relative_path in remote_files:
-                                if local_sha == remote_files[relative_path]:
-                                    status = "✅ 相同"
-                                    status_color = "gray"
-                                else:
-                                    status = "🔄 已修改"
-                                    status_color = "blue"
-                            else:
-                                status = "➕ 新文件"
-                                status_color = "green"
-                            
-                            # 添加到结果
-                            scan_results.append({
-                                'local_path': local_file_path,
-                                'relative_path': relative_path,
-                                'size': file_size,
-                                'mtime': file_mtime,
-                                'status': status,
-                                'sha': local_sha
-                            })
-                            
-                            # 添加到树视图
-                            size_str = f"{file_size} bytes" if file_size < 1024 else f"{file_size/1024:.1f} KB"
-                            item = file_tree.insert('', tk.END,
-                                                   text=relative_path,
-                                                   values=(status, size_str, file_mtime))
-                            
-                            # 设置颜色标签
-                            if status.startswith("✅"):
-                                file_tree.set(item, 'status', status)
-                            elif status.startswith("🔄"):
-                                file_tree.set(item, 'status', status)
-                            elif status.startswith("➕"):
-                                file_tree.set(item, 'status', status)
-                        
-                        except Exception as e:
-                            print(f"处理文件 {relative_path} 时出错: {e}")
+                                file_stat = os.stat(local_file_path)
+                                file_size = file_stat.st_size
+                                file_mtime = datetime.fromtimestamp(file_stat.st_mtime).strftime("%Y-%m-%d %H:%M")
+                                
+                                # 计算本地文件SHA
+                                try:
+                                    with open(local_file_path, 'rb') as f:
+                                        content = f.read()
+                                    local_sha = hashlib.sha1(f"blob {len(content)}\0".encode() + content).hexdigest()
+                                except Exception:
+                                    local_sha = None
+                                
+                                all_files[relative_path] = {
+                                    'local_path': local_file_path,
+                                    'local_size': file_size,
+                                    'local_mtime': file_mtime,
+                                    'local_sha': local_sha,
+                                    'remote_sha': remote_files.get(relative_path),
+                                    'remote_size': remote_file_details.get(relative_path, {}).get('size', 0),
+                                    'exists_local': True,
+                                    'exists_remote': relative_path in remote_files
+                                }
+                            except Exception as e:
+                                print(f"处理本地文件 {relative_path} 时出错: {e}")
                 
-                # 检查需要同步的文件数量
-                files_to_sync = [f for f in scan_results if not f['status'].startswith("✅")]
+                # 添加只存在于远程的文件
+                for remote_path in remote_files:
+                    if remote_path not in all_files and not should_ignore_file(remote_path, ignore_patterns):
+                        all_files[remote_path] = {
+                            'local_path': os.path.join(local_repo_path, remote_path),
+                            'local_size': 0,
+                            'local_mtime': '',
+                            'local_sha': None,
+                            'remote_sha': remote_files[remote_path],
+                            'remote_size': remote_file_details.get(remote_path, {}).get('size', 0),
+                            'exists_local': False,
+                            'exists_remote': True
+                        }
                 
-                scan_status.config(text=f"✅ 扫描完成：共 {len(scan_results)} 个文件，{len(files_to_sync)} 个需要同步")
+                scan_status.config(text="🔍 分析文件差异...")
                 
-                # 始终启用同步按钮，让用户可以选择同步模式
+                # 分析每个文件的状态和建议的同步方向
+                for relative_path, file_info in all_files.items():
+                    exists_local = file_info['exists_local']
+                    exists_remote = file_info['exists_remote']
+                    local_sha = file_info['local_sha']
+                    remote_sha = file_info['remote_sha']
+                    
+                    # 确定文件状态和同步方向
+                    if exists_local and exists_remote:
+                        if local_sha == remote_sha:
+                            status = "✅ 相同"
+                            suggested_direction = "="
+                        else:
+                            status = "🔄 已修改"
+                            if sync_direction == "local_to_remote":
+                                suggested_direction = "↑"
+                            elif sync_direction == "remote_to_local":
+                                suggested_direction = "↓"
+                            else:  # bidirectional
+                                suggested_direction = "↕"
+                    elif exists_local and not exists_remote:
+                        status = "➕ 仅本地"
+                        suggested_direction = "↑" if sync_direction != "remote_to_local" else "×"
+                    elif not exists_local and exists_remote:
+                        status = "📥 仅远程"
+                        suggested_direction = "↓" if sync_direction != "local_to_remote" else "×"
+                    else:
+                        continue  # 不应该发生
+                    
+                    # 确定显示的文件大小和修改时间
+                    if exists_local:
+                        display_size = file_info['local_size']
+                        display_mtime = file_info['local_mtime']
+                    else:
+                        display_size = file_info['remote_size']
+                        display_mtime = "远程文件"
+                    
+                    # 添加到结果
+                    file_data = {
+                        'relative_path': relative_path,
+                        'local_path': file_info['local_path'],
+                        'status': status,
+                        'sync_direction': suggested_direction,
+                        'size': display_size,
+                        'mtime': display_mtime,
+                        'exists_local': exists_local,
+                        'exists_remote': exists_remote,
+                        'local_sha': local_sha,
+                        'remote_sha': remote_sha
+                    }
+                    scan_results.append(file_data)
+                    
+                    # 添加到树视图
+                    size_str = f"{display_size} bytes" if display_size < 1024 else f"{display_size/1024:.1f} KB"
+                    
+                    # 默认选择状态：相同的文件不选择，其他的选择
+                    default_selected = "❌" if status.startswith("✅") else "✅"
+                    
+                    item = file_tree.insert('', tk.END,
+                                           text=relative_path,
+                                           values=(default_selected, suggested_direction, status, size_str, display_mtime))
+                
+                # 更新统计信息
+                update_selection_count()
+                
+                # 始终启用同步按钮
                 sync_button.config(state=tk.NORMAL)
-                
-                if files_to_sync:
-                    sync_status_label.config(text=f"发现 {len(files_to_sync)} 个文件需要同步", foreground="blue")
-                    # 扫描完成后高亮同步按钮
-                    dialog.after(500, lambda: highlight_sync_button())
-                else:
-                    sync_status_label.config(text="所有文件已是最新版本，可选择强制覆盖模式", foreground="green")
-                
                 scan_button.config(state=tk.NORMAL)
+                
+                # 扫描完成
+                files_to_sync = [f for f in scan_results if not f['status'].startswith("✅")]
                 
             except Exception as e:
                 scan_status.config(text="❌ 扫描失败")
                 scan_button.config(state=tk.NORMAL)
-                messagebox.showerror("错误", f"扫描本地文件失败: {e}")
+                messagebox.showerror("错误", f"扫描文件失败: {e}")
+        
+        # 当同步方向改变时重新扫描
+        def on_direction_change():
+            """同步方向改变时的处理"""
+            if scan_results:  # 如果已经扫描过，重新分析
+                scan_files()
+        
+        sync_direction_var.trace('w', lambda *args: on_direction_change())
         
         def start_sync():
             """开始同步"""
             if not scan_results:
-                messagebox.showwarning("警告", "请先扫描本地文件")
+                messagebox.showwarning("警告", "请先扫描文件")
+                return
+            
+            # 获取选中的文件
+            selected_files = []
+            for item in file_tree.get_children():
+                if file_tree.set(item, 'selected') == "✅":
+                    file_path = file_tree.item(item, 'text')
+                    # 从扫描结果中找到对应的文件信息
+                    for file_data in scan_results:
+                        if file_data['relative_path'] == file_path:
+                            selected_files.append(file_data)
+                            break
+            
+            if not selected_files:
+                messagebox.showwarning("警告", "请选择要同步的文件")
                 return
             
             sync_mode = sync_mode_var.get()
+            sync_direction = sync_direction_var.get()
+            
+            # 预览模式
+            if sync_mode == "preview":
+                self.show_enhanced_sync_preview(selected_files, repo, sync_direction)
+                return
             
             # 过滤需要同步的文件
             if sync_mode == "smart":
-                files_to_sync = [f for f in scan_results if not f['status'].startswith("✅")]
-            elif sync_mode == "force":
-                files_to_sync = scan_results
-            else:  # preview
-                self.show_sync_preview(scan_results, repo)
-                return
+                # 智能模式：只同步有差异的文件
+                files_to_sync = [f for f in selected_files if not f['status'].startswith("✅")]
+            else:  # force
+                # 强制模式：同步所有选中的文件
+                files_to_sync = selected_files
             
             if not files_to_sync:
-                if sync_mode == "smart":
-                    messagebox.showinfo("提示", "智能模式下没有文件需要同步。\n\n如果要强制上传所有文件，请选择'🔄 强制覆盖'模式。")
-                else:
-                    messagebox.showinfo("提示", "没有找到任何文件可以同步")
+                messagebox.showinfo("提示", "选中的文件都是最新版本，无需同步")
                 return
             
             # 确认同步
-            mode_name = {"smart": "智能同步", "force": "强制覆盖", "preview": "仅预览"}[sync_mode]
+            direction_name = {
+                "local_to_remote": "本地 → 远程",
+                "remote_to_local": "远程 → 本地",
+                "bidirectional": "双向智能同步"
+            }[sync_direction]
+            
+            mode_name = {"smart": "智能同步", "force": "强制覆盖"}[sync_mode]
+            
             result = messagebox.askyesno("确认同步", 
-                f"将要同步 {len(files_to_sync)} 个文件到仓库 {repo.name}\n\n"
+                f"将要同步 {len(files_to_sync)} 个文件\n\n"
+                f"同步方向: {direction_name}\n"
                 f"同步模式: {mode_name}\n"
-                f"⚠️ 这将覆盖远程仓库中的对应文件！\n\n"
+                f"仓库: {repo.name}\n\n"
+                f"⚠️ 此操作将修改文件内容！\n\n"
                 f"是否继续？")
             
             if result:
                 dialog.destroy()
-                self.execute_sync(repo, files_to_sync, local_repo_path)
+                self.execute_enhanced_sync(repo, files_to_sync, local_repo_path, sync_direction)
         
         # 绑定事件
-        scan_button.config(command=scan_local_files)
+        scan_button.config(command=scan_files)
         sync_button.config(command=start_sync)
         
-        # 如果本地路径存在，自动扫描；如果不存在，给出提示
-        if os.path.exists(local_repo_path):
-            dialog.after(500, scan_local_files)  # 延迟执行，等待界面加载完成
-        else:
-            # 本地路径不存在时的处理
-            scan_status.config(text="❌ 本地仓库路径不存在，请先执行代码功能下载仓库")
-            sync_status_label.config(text="请先通过'执行代码'功能下载仓库到本地", foreground="orange")
-            
-            # 添加一个快捷按钮来执行代码功能
-            quick_download_button = ttk.Button(scan_button_frame, text="📥 快速下载仓库", 
-                                             command=lambda: self.quick_download_repo(repo, dialog))
-            quick_download_button.pack(side=tk.LEFT, padx=(10, 0))
+        # 自动扫描文件
+        dialog.after(500, scan_files)  # 延迟执行，等待界面加载完成
+    
+    def show_enhanced_sync_preview(self, selected_files, repo, sync_direction):
+        """显示增强的同步预览"""
+        preview_dialog = tk.Toplevel(self.root)
+        preview_dialog.title(f"同步预览 - {repo.name}")
+        preview_dialog.geometry("800x600")
+        preview_dialog.transient(self.root)
+        preview_dialog.grab_set()
+        
+        # 创建预览内容
+        ttk.Label(preview_dialog, text=f"同步预览 - {repo.name}", font=("Arial", 14, "bold")).pack(pady=10)
+        
+        # 同步信息
+        direction_name = {
+            "local_to_remote": "本地 → 远程 (上传)",
+            "remote_to_local": "远程 → 本地 (下载)",
+            "bidirectional": "双向智能同步"
+        }[sync_direction]
+        
+        info_frame = ttk.Frame(preview_dialog)
+        info_frame.pack(fill=tk.X, padx=20, pady=10)
+        
+        ttk.Label(info_frame, text=f"同步方向: {direction_name}", font=("Arial", 12)).pack(anchor=tk.W)
+        ttk.Label(info_frame, text=f"选中文件: {len(selected_files)} 个", font=("Arial", 12)).pack(anchor=tk.W)
+        
+        # 统计信息
+        stats = {
+            "相同": len([f for f in selected_files if f['status'].startswith("✅")]),
+            "已修改": len([f for f in selected_files if f['status'].startswith("🔄")]),
+            "仅本地": len([f for f in selected_files if f['status'].startswith("➕")]),
+            "仅远程": len([f for f in selected_files if f['status'].startswith("📥")])
+        }
+        
+        stats_frame = ttk.Frame(preview_dialog)
+        stats_frame.pack(fill=tk.X, padx=20, pady=10)
+        
+        stats_text = " | ".join([f"{k}: {v}" for k, v in stats.items() if v > 0])
+        ttk.Label(stats_frame, text=f"文件状态: {stats_text}").pack()
+        
+        # 详细列表
+        list_frame = ttk.LabelFrame(preview_dialog, text="文件详情")
+        list_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 10))
+        
+        preview_text = scrolledtext.ScrolledText(list_frame, wrap=tk.NONE)
+        preview_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # 生成预览内容
+        preview_content = f"同步预览报告\n{'='*60}\n\n"
+        preview_content += f"同步方向: {direction_name}\n"
+        preview_content += f"总文件数: {len(selected_files)}\n\n"
+        
+        for category, emoji in [("✅", "相同文件"), ("🔄", "已修改文件"), ("➕", "仅本地文件"), ("📥", "仅远程文件")]:
+            category_files = [f for f in selected_files if f['status'].startswith(category)]
+            if category_files:
+                preview_content += f"{category} {emoji} ({len(category_files)} 个):\n"
+                for f in category_files:
+                    direction_symbol = f['sync_direction']
+                    preview_content += f"   {direction_symbol} {f['relative_path']}\n"
+                preview_content += "\n"
+        
+        preview_text.insert(tk.END, preview_content)
+        preview_text.config(state=tk.DISABLED)
+        
+        # 关闭按钮
+        ttk.Button(preview_dialog, text="关闭", command=preview_dialog.destroy).pack(pady=10)
     
     def show_sync_preview(self, scan_results, repo):
         """显示同步预览"""
@@ -2294,6 +2505,180 @@ Python版本: {platform.python_version()}
         
         # 启动同步线程
         threading.Thread(target=sync_files_thread, daemon=True).start()
+    
+    def execute_enhanced_sync(self, repo, files_to_sync, local_repo_path, sync_direction):
+        """执行增强的同步操作"""
+        # 创建同步进度对话框
+        progress_dialog = tk.Toplevel(self.root)
+        progress_dialog.title(f"同步进度 - {repo.name}")
+        progress_dialog.geometry("700x500")
+        progress_dialog.transient(self.root)
+        progress_dialog.grab_set()
+        
+        # 进度信息
+        direction_name = {
+            "local_to_remote": "本地 → 远程",
+            "remote_to_local": "远程 → 本地",
+            "bidirectional": "双向智能同步"
+        }[sync_direction]
+        
+        ttk.Label(progress_dialog, text=f"正在同步: {direction_name}", font=("Arial", 12, "bold")).pack(pady=10)
+        ttk.Label(progress_dialog, text=f"仓库: {repo.name}").pack(pady=5)
+        
+        # 当前操作文件
+        current_file_label = ttk.Label(progress_dialog, text="准备中...")
+        current_file_label.pack(pady=5)
+        
+        # 进度条
+        progress_var = tk.DoubleVar()
+        progress_bar = ttk.Progressbar(progress_dialog, variable=progress_var, maximum=100)
+        progress_bar.pack(fill=tk.X, padx=20, pady=10)
+        
+        # 统计信息
+        stats_label = ttk.Label(progress_dialog, text="")
+        stats_label.pack(pady=5)
+        
+        # 日志框
+        log_frame = ttk.LabelFrame(progress_dialog, text="同步日志")
+        log_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
+        
+        log_text = scrolledtext.ScrolledText(log_frame, height=12)
+        log_text.pack(fill=tk.BOTH, expand=True)
+        
+        # 关闭按钮（初始禁用）
+        close_button = ttk.Button(progress_dialog, text="关闭", command=progress_dialog.destroy, state=tk.DISABLED)
+        close_button.pack(pady=10)
+        
+        def enhanced_sync_thread():
+            """增强的同步线程"""
+            import os
+            
+            uploaded = 0
+            downloaded = 0
+            failed = 0
+            total_files = len(files_to_sync)
+            
+            def update_progress(current, total, filename, status):
+                progress = (current / total) * 100
+                self.root.after(0, lambda: progress_var.set(progress))
+                self.root.after(0, lambda: current_file_label.config(text=f"当前: {filename}"))
+                self.root.after(0, lambda: stats_label.config(text=f"进度: {current}/{total} | 上传: {uploaded} | 下载: {downloaded} | 失败: {failed}"))
+                self.root.after(0, lambda: log_text.insert(tk.END, f"{status}\n"))
+                self.root.after(0, lambda: log_text.see(tk.END))
+            
+            try:
+                for i, file_info in enumerate(files_to_sync, 1):
+                    try:
+                        relative_path = file_info['relative_path']
+                        local_file_path = file_info['local_path']
+                        exists_local = file_info['exists_local']
+                        exists_remote = file_info['exists_remote']
+                        
+                        update_progress(i, total_files, relative_path, f"正在处理 {relative_path}...")
+                        
+                        # 根据同步方向和文件状态决定操作
+                        if sync_direction == "local_to_remote":
+                            # 本地到远程：上传文件
+                            if exists_local:
+                                self._upload_file_to_remote(repo, relative_path, local_file_path, update_progress, i, total_files)
+                                uploaded += 1
+                            else:
+                                update_progress(i, total_files, relative_path, f"⚠️ {relative_path} 本地文件不存在，跳过")
+                        
+                        elif sync_direction == "remote_to_local":
+                            # 远程到本地：下载文件
+                            if exists_remote:
+                                self._download_file_from_remote(repo, relative_path, local_file_path, update_progress, i, total_files)
+                                downloaded += 1
+                            else:
+                                update_progress(i, total_files, relative_path, f"⚠️ {relative_path} 远程文件不存在，跳过")
+                        
+                        elif sync_direction == "bidirectional":
+                            # 双向同步：智能判断
+                            if exists_local and exists_remote:
+                                # 都存在，比较修改时间或让用户选择
+                                if file_info['status'].startswith("🔄"):
+                                    # 默认上传本地版本（可以后续增加更智能的判断）
+                                    self._upload_file_to_remote(repo, relative_path, local_file_path, update_progress, i, total_files)
+                                    uploaded += 1
+                                else:
+                                    update_progress(i, total_files, relative_path, f"✅ {relative_path} 文件相同，无需同步")
+                            elif exists_local and not exists_remote:
+                                # 只有本地，上传
+                                self._upload_file_to_remote(repo, relative_path, local_file_path, update_progress, i, total_files)
+                                uploaded += 1
+                            elif not exists_local and exists_remote:
+                                # 只有远程，下载
+                                self._download_file_from_remote(repo, relative_path, local_file_path, update_progress, i, total_files)
+                                downloaded += 1
+                        
+                    except Exception as e:
+                        failed += 1
+                        error_msg = str(e)
+                        update_progress(i, total_files, relative_path, f"❌ {relative_path} 同步失败: {error_msg}")
+                
+                # 同步完成
+                self.root.after(0, lambda: current_file_label.config(text="同步完成"))
+                self.root.after(0, lambda: progress_var.set(100))
+                self.root.after(0, lambda: log_text.insert(tk.END, f"\n🎉 同步完成！上传: {uploaded}, 下载: {downloaded}, 失败: {failed}\n"))
+                self.root.after(0, lambda: log_text.see(tk.END))
+                self.root.after(0, lambda: close_button.config(state=tk.NORMAL))
+                
+                # 刷新当前目录显示
+                if self.current_repo and self.current_repo.name == repo.name:
+                    self.root.after(0, lambda: self.refresh_current_directory())
+                
+            except Exception as e:
+                error_msg = str(e)
+                self.root.after(0, lambda: log_text.insert(tk.END, f"\n💥 同步失败: {error_msg}\n"))
+                self.root.after(0, lambda: close_button.config(state=tk.NORMAL))
+        
+        # 启动同步线程
+        threading.Thread(target=enhanced_sync_thread, daemon=True).start()
+    
+    def _upload_file_to_remote(self, repo, relative_path, local_file_path, update_progress, current, total):
+        """上传文件到远程"""
+        try:
+            with open(local_file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except UnicodeDecodeError:
+            try:
+                with open(local_file_path, 'r', encoding='gbk') as f:
+                    content = f.read()
+            except UnicodeDecodeError:
+                with open(local_file_path, 'rb') as f:
+                    content = base64.b64encode(f.read()).decode('utf-8')
+                    update_progress(current, total, relative_path, f"⚠️ {relative_path} 使用二进制模式上传")
+        
+        self.github_manager.create_or_update_file(
+            repo, 
+            relative_path, 
+            content, 
+            f"Upload {relative_path} via enhanced sync"
+        )
+        update_progress(current, total, relative_path, f"📤 {relative_path} 上传成功")
+    
+    def _download_file_from_remote(self, repo, relative_path, local_file_path, update_progress, current, total):
+        """从远程下载文件"""
+        import os
+        
+        try:
+            # 获取远程文件内容
+            content, _ = self.github_manager.get_file_content(repo, relative_path)
+            
+            # 确保本地目录存在
+            local_dir = os.path.dirname(local_file_path)
+            if local_dir and not os.path.exists(local_dir):
+                os.makedirs(local_dir, exist_ok=True)
+            
+            # 写入本地文件
+            with open(local_file_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+            
+            update_progress(current, total, relative_path, f"📥 {relative_path} 下载成功")
+            
+        except Exception as e:
+            raise Exception(f"下载失败: {e}")
     
     def quick_download_repo(self, repo, parent_dialog):
         """快速下载仓库到本地"""
